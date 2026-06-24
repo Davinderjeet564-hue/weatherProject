@@ -1,3 +1,5 @@
+import ThemeDropdown from "./ThemeDropdown";
+
 function Header() {
   return (
     <header className="navbar bg-base-100 border-b border-base-200 px-6 py-4 mb-4">
@@ -9,8 +11,8 @@ function Header() {
           Skyline<span className="font-light text-base-content">Weather</span>
         </h1>
       </div>
-      <div className="flex-none">
-        <span className="badge badge-primary badge-outline font-semibold">v1.0</span>
+      <div className="flex">
+        <ThemeDropdown />
       </div>
     </header>
   );

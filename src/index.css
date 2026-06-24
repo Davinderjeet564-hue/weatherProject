@@ -1,2 +1,5 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  /* Enable the themes you want to switch between */
+  themes: light --default, dark, cupcake, valentine;
+}
