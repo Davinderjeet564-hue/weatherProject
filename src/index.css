@@ -1,5 +1,20 @@
 @import "tailwindcss";
 @plugin "daisyui" {
   /* Enable the themes you want to switch between */
-  themes: light --default, dark, cupcake, valentine;
+  themes: light --default, dark, cupcake, valentine, dracula;
+}
+
+@utility animate-slide-up {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

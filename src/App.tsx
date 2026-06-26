@@ -1,8 +1,9 @@
 import Header from "./components/Header";
 import Searchbar from "./components/Searchbar";
+import ShowUserWeatherData from "./components/ShowUserWeatherData";
 
 import { useState } from "react";
-import ShowWeather from "./components/ShowWeather";
+import ShowWeatherCard from "./components/ShowWeatherCard";
 import type { WeatherData } from "./types";
 
 function App() {
@@ -27,10 +28,21 @@ function App() {
 
     try {
       const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${trimmed}&appid=${apiKey}&units=metric`);
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${trimmed}&appid=${apiKey}&units=metric`,
+      );
 
       if (!response.ok) {
-        throw new Error(`City "${trimmed}" not found`);
+        if (response.status === 401) {
+          throw new Error("Invalid API key. Please check your OpenWeatherMap configuration.");
+        }
+        if (response.status === 404) {
+          throw new Error(`City "${trimmed}" not found.`);
+        }
+        if (response.status === 429) {
+          throw new Error("Rate limit exceeded. Please try again later.");
+        }
+        throw new Error(`Failed to fetch weather data (Status: ${response.status})`);
       }
 
       const data = await response.json();
@@ -38,7 +50,9 @@ function App() {
       setShowCard(true);
       setIsLoading(false);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+      );
       setIsLoading(false);
     }
   };
@@ -49,6 +63,13 @@ function App() {
       <div className="flex-1 container mx-auto px-4 max-w-xl">
         <Searchbar onSearch={handleSearch} />
 
+        { /* Show user's current location weather info */ }
+
+        
+        <div>
+          <ShowUserWeatherData />
+        </div>
+
         {isLoading ? (
           <div className="flex flex-col items-center justify-center p-12 mt-6">
             <span className="loading loading-spinner loading-lg text-primary mb-4"></span>
@@ -57,12 +78,22 @@ function App() {
             </p>
           </div>
         ) : weatherData && showCard ? (
-          <ShowWeather weatherData={weatherData} CloseCard={closeCard} />
+          <ShowWeatherCard weatherData={weatherData} CloseCard={closeCard} />
         ) : (
           error && (
             <div className="alert alert-error max-w-md mx-auto mt-6 shadow-sm flex gap-3 text-sm rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span>{error}</span>
             </div>
