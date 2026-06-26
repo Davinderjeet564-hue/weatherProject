@@ -1,6 +1,5 @@
 import Header from "./components/Header";
 import Searchbar from "./components/Searchbar";
-import ShowUserWeatherData from "./components/ShowUserWeatherData";
 
 import { useState } from "react";
 import ShowWeatherCard from "./components/ShowWeatherCard";
@@ -28,6 +27,9 @@ function App() {
 
     try {
       const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+      if (!apiKey) {
+        throw new Error("Weather API key is not configured.");
+      }
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${trimmed}&appid=${apiKey}&units=metric`,
       );
@@ -48,11 +50,64 @@ function App() {
       const data = await response.json();
       setWeatherData(data);
       setShowCard(true);
-      setIsLoading(false);
-    } catch (error) {
+    } catch (err) {
       setError(
-        error instanceof Error ? error.message : "An unexpected error occurred",
+        err instanceof Error ? err.message : "An unexpected error occurred",
       );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLocationSearch = async (): Promise<void> => {
+    setError("");
+    setWeatherData(null);
+    setIsLoading(true);
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation is not supported by your browser."));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+      if (!apiKey) {
+        throw new Error("Weather API key is not configured.");
+      }
+
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`,
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Invalid API key. Please check your OpenWeatherMap configuration.");
+        }
+        throw new Error(`Failed to fetch weather data (Status: ${response.status})`);
+      }
+
+      const data = await response.json();
+      setWeatherData(data);
+      setShowCard(true);
+    } catch (err) {
+      let msg = "An unexpected error occurred";
+      if (err instanceof Error) {
+        if (err.message.includes("denied") || err.name === "GeolocationPositionError") {
+          msg = "Location access denied. Please enable location permissions in your browser or search manually.";
+        } else {
+          msg = err.message;
+        }
+      }
+      setError(msg);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -60,15 +115,8 @@ function App() {
   return (
     <div className="min-h-screen bg-base-200/30 flex flex-col pb-12">
       <Header />
-      <div className="flex-1 container mx-auto px-4 max-w-xl">
-        <Searchbar onSearch={handleSearch} />
-
-        { /* Show user's current location weather info */ }
-
-        
-        <div>
-          <ShowUserWeatherData />
-        </div>
+      <div className="flex-1 container mx-auto px-4 max-w-xl flex flex-col gap-6">
+        <Searchbar onSearch={handleSearch} onLocationSearch={handleLocationSearch} />
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center p-12 mt-6">
@@ -81,7 +129,7 @@ function App() {
           <ShowWeatherCard weatherData={weatherData} CloseCard={closeCard} />
         ) : (
           error && (
-            <div className="alert alert-error max-w-md mx-auto mt-6 shadow-sm flex gap-3 text-sm rounded-xl">
+            <div className="alert alert-error max-w-md mx-auto shadow-md flex gap-3 text-sm rounded-xl border border-error/20">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="stroke-current shrink-0 h-6 w-6"
@@ -91,7 +139,7 @@ function App() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
