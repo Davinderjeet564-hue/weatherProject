@@ -17,35 +17,6 @@ function Searchbar({ onSearch, onLocationSearch }: SearchBarProps) {
     <div className="flex w-full justify-center px-4 py-2">
       <form onSubmit={onSubmit} className="w-full max-w-md">
         <div className="join w-full shadow-md rounded-2xl border border-base-300 bg-base-100 overflow-hidden">
-          {/* Geolocation Button */}
-          <div className="tooltip tooltip-bottom shrink-0 flex items-center" data-tip="Use current location">
-            <button
-              type="button"
-              onClick={onLocationSearch}
-              className="btn btn-ghost join-item h-12 w-12 p-0 text-base-content/60 hover:text-primary transition-colors flex items-center justify-center border-none"
-              aria-label="Use current location"
-            >
-              <svg
-                className="w-5.5 h-5.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19.5 10.5c0 7.105-7.5 11.25-7.5 11.25S4.5 17.605 4.5 10.5a7.5 7.5 0 1115 0z"
-                />
-              </svg>
-            </button>
-          </div>
-
           {/* Search Icon & Input */}
           <div className="flex items-center flex-1 join-item bg-base-100 pl-2">
             <svg
@@ -77,6 +48,37 @@ function Searchbar({ onSearch, onLocationSearch }: SearchBarProps) {
             className="btn btn-primary join-item h-12 px-6 font-semibold border-none rounded-none text-primary-content hover:opacity-90"
           >
             Search
+          </button>
+        </div>
+        {/* Geolocation Button */}
+        <div className="tooltip tooltip-bottom shrink-0 flex items-center justify-center pt-4" data-tip="Use current location">
+          <button
+            type="button"
+            onClick={onLocationSearch}
+            className="btn btn-border join-item text-base-content/60 hover:text-base-content hover:bg-primary/60 transition-colors flex items-center justify-center border-none"
+            aria-label="Use current location"
+          >
+          <div className="flex items-center gap-2">
+            <svg
+              className="w-5 h-5 text-base-content/40 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+              ></path>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              ></path>
+            </svg>
+            <span>Get Weather Info</span>
+          </div>
           </button>
         </div>
       </form>
